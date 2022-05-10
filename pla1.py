@@ -1,3 +1,5 @@
+# generate data
+# list of points 
 import numpy as np 
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
@@ -10,30 +12,32 @@ X0 = np.random.multivariate_normal(means[0], cov, N).T
 X1 = np.random.multivariate_normal(means[1], cov, N).T
 
 X = np.concatenate((X0, X1), axis = 1)
-y = np.concatenate((np.ones((1, N)), -1*np.ones((1, N))), axis = 1) # 10 point have label 1, 10 have label -1
+y = np.concatenate((np.ones((1, N)), -1*np.ones((1, N))), axis = 1)
 # Xbar 
 X = np.concatenate((np.ones((1, 2*N)), X), axis = 0)
+
 
 def h(w, x):    
     return np.sign(np.dot(w.T, x))
 
-def has_converged(X, y, w):    
-    return np.array_equal(h(w, X), y) 
+def has_converged(X, y, w):
+    
+    return np.array_equal(h(w, X), y) #True if h(w, X) == y else False
 
 def perceptron(X, y, w_init):
     w = [w_init]
-    N = X.shape[1] # shape of column
-    d = X.shape[0] # shape of row
+    N = X.shape[1]
     mis_points = []
     while True:
         # mix data 
-        mix_id = np.random.permutation(N) #Randomly permute a sequence, or return a permuted range.
+        mix_id = np.random.permutation(N)
         for i in range(N):
-            xi = X[:, mix_id[i]].reshape(d, 1) # insert all number in column mix_id[i], reshape: in this case make row to column
+            xi = X[:, mix_id[i]].reshape(3, 1)
             yi = y[0, mix_id[i]]
-            if h(w[-1], xi)[0] != yi: # misclassified point, w[-1] vector w not the last number of w
+            if h(w[-1], xi)[0] != yi:
                 mis_points.append(mix_id[i])
-                w_new = w + yi*xi 
+                w_new = w[-1] + yi*xi 
+
                 w.append(w_new)
                 
         if has_converged(X, y, w[-1]):
@@ -41,10 +45,11 @@ def perceptron(X, y, w_init):
     return (w, mis_points)
 
 d = X.shape[0]
-w_init = np.random.randn(d, 1) #random 3 number smaller than 1
+w_init = np.random.randn(d, 1)
 (w, m) = perceptron(X, y, w_init)
-
 print(m)
+# print(w)
+# print(len(w))
 
 def draw_line(w):
     w0, w1, w2 = w[0], w[1], w[2]
